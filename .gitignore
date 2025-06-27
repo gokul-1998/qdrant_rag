@@ -1,0 +1,5 @@
+sec.py
+env
+
+*.pyc
+.env
