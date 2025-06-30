@@ -107,7 +107,12 @@ def search(q: str):
         limit=5,
         with_payload=True
     )
-    return [{"id": r.id, "score": r.score, "payload": r.payload} for r in search_result]
+    result= [{"id": r.id, "score": r.score, "payload": r.payload} for r in search_result]
+    
+    return {
+        "total": len(result),
+        "results": result
+    }
 
 
 @app.delete("/delete/{vector_id}")
@@ -121,7 +126,16 @@ def delete_vector(vector_id: str):
 
 @app.get("/list/")
 def list_all():
+    # Get collection info to get total count
+    collection_info = qdrant.get_collection(collection_name=collection_name)
+    total = collection_info.points_count
+    
+    # Get the points with pagination
     scroll = qdrant.scroll(collection_name=collection_name, limit=100, with_payload=True)
-    return [
-        {"id": p.id, "payload": p.payload} for p in scroll[0]
-    ]
+    
+    return {
+        "total": total,
+        "items": [
+            {"id": p.id, "payload": p.payload} for p in scroll[0]
+        ]
+    }
